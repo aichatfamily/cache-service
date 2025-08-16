@@ -24,8 +24,28 @@ services:
     networks:
       - cache-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: cache-service-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      start_period: 5s
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - cache-network
+
 volumes:
   mariadb_data:
+    driver: local
+  redis_data:
     driver: local
 
 networks:
